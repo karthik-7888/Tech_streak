@@ -1,75 +1,152 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Link } from "expo-router";
+import React, { useState, useEffect, useRef } from "react";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
-export default function HomeScreen() {
+import {Tabs} from 'expo-router';
+// Update the import path to use a relative path and forward slashes
+// Update the import path to use a relative path and forward slashes
+import {images} from '@/constants/images';
+import { icons } from '@/constants/icons';
+import {
+  View,
+  TextInput,
+  Animated,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Image
+} from "react-native";
+
+const FloatingLabelInput = ({ label, value, setValue, secureTextEntry = false }) => {
+  const isFocused = value !== '';
+  const labelAnim = useRef(new Animated.Value(value ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(labelAnim, {
+      toValue: isFocused ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [isFocused]);
+
+  const labelStyle = {
+    position: "absolute",
+    left: 10,
+    top: labelAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [12, -10],
+    }),
+    fontSize: labelAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [16, 12],
+    }),
+    color: "#888",
+    backgroundColor: "#fff",
+    paddingHorizontal: 2,
+    borderRadius: 12,
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.inputContainer}>
+      
+      <Animated.Text style={labelStyle}>{label}</Animated.Text>
+      <TextInput
+        value={value}
+        onChangeText={setValue}
+        style={styles.textInput}
+        secureTextEntry={secureTextEntry}
+        onFocus={() => {
+          if (!isFocused) Animated.timing(labelAnim, { toValue: 1, duration: 200, useNativeDriver: false }).start();
+        }}
+        onBlur={() => {
+          if (value === '') Animated.timing(labelAnim, { toValue: 0, duration: 200, useNativeDriver: false }).start();
+        }}
+      />
+    </View>
   );
-}
+};
+
+const App = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <View style={styles.container}>
+      <Image
+        source={images.Luffy}
+        style={{ width: 150, height: 150, marginBottom: 20 }}
+      />
+      <Text style={styles.heading}>Tech-Streak🔥</Text>
+      <FloatingLabelInput label="Email" value={email} setValue={setEmail} />
+      <FloatingLabelInput label="Password" value={password} setValue={setPassword} secureTextEntry />
+
+      {/* <TouchableOpacity style={styles.button}> */}
+        {/* <Text style={{ color: '#fff', textAlign: 'center' }}>Sign Up</Text> */}
+      {/* </TouchableOpacity> */}
+
+
+      <TouchableOpacity style={styles.button}>
+        <Text style={{ color: '#fff', textAlign: 'center' }}>Login</Text>
+      </TouchableOpacity>
+
+      <Link href="/forgot-password" style={{ marginTop: 20, color: '#007bff', textDecorationLine: 'underline' }}>Forgot Password?</Link>
+    </View>
+  );
+};
+
+export default App;
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "#000",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  inputContainer: {
+    width: 250,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    marginBottom: 15,
+    paddingTop: 12,
+    paddingHorizontal: 10,
+    position: "relative",
+    backgroundColor: "#fff",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  textInput: {
+    height: 40,
+    fontSize: 16,
+    color: "#000",
+  },
+  button: {
+    backgroundColor: "#007bff",
+    paddingVertical: 10,
+    width: 250,
+    borderRadius: 6,
+  },
+  heading: {
+    fontSize: 24,
+    color: "#fff",
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  label: {
+    position: "absolute",
+    left: 10,
+    top: 12,
+    fontSize: 16,
+    // color: "#888",
+    // backgroundColor: "#fff",
+    paddingHorizontal: 2,
+  },
+  labelStyle: {
+    position: "absolute",
+    left: 10,
+    top: 12,
+    fontSize: 16,
+    // color: "#888",
+    // backgroundColor: "#fff",
+    // paddingHorizontal: 2,
   },
 });
